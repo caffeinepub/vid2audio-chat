@@ -1,0 +1,17 @@
+{
+  "frontend/src/App.tsx": "Main app component that renders the ChatScreen as the single-page application entry point.",
+  "frontend/src/features/chat/ChatScreen.tsx": "Main chat screen component managing conversion jobs, handling user input (link/upload), coordinating conversion flow, and displaying header/footer with job history.",
+  "frontend/src/features/chat/components/ChatThread.tsx": "Displays conversion job history as a chat-style thread with status indicators, progress bars, download buttons, and error messages.",
+  "frontend/src/features/chat/components/ChatComposer.tsx": "Input composer component with tabs for link/upload modes, format selection (MP3/WAV), and validation before conversion.",
+  "frontend/src/features/jobs/types.ts": "TypeScript type definitions for conversion jobs including status, metadata, and result data.",
+  "frontend/src/features/jobs/useJobHistory.ts": "React hook managing in-session conversion job history with add and update operations.",
+  "frontend/src/features/conversion/useConversionMutation.ts": "React Query mutation hook wrapping the video-to-audio conversion logic with progress tracking.",
+  "frontend/src/features/conversion/convertVideoToAudio.ts": "Core client-side conversion logic using Web Audio API to decode video, encode to WAV directly, and encode to MP3 using lamejs with proper buffer handling to satisfy TypeScript's strict Blob type requirements.",
+  "frontend/src/features/conversion/fetchVideoFromUrl.ts": "Utility to fetch video files from URLs with CORS handling and user-friendly error messages.",
+  "frontend/src/features/validation/urlValidation.ts": "URL validation and normalization utilities for link input.",
+  "frontend/src/types/vendor-lame.d.ts": "TypeScript ambient type declarations for the lamejs MP3 encoder library.",
+  "frontend/public/vendor/lame.min.js": "Minified lamejs MP3 encoder library (v1.2.0) for browser-based MP3 encoding.",
+  "frontend/src/index.css": "Global styles with warm amber/orange color palette using OKLCH color system for light and dark modes.",
+  "frontend/tailwind.config.js": "Tailwind configuration with extended color tokens matching the warm amber/orange theme.",
+  "frontend/src/hooks/useQueries.ts": "Empty placeholder file as all conversion logic is client-side with no backend queries needed."
+}

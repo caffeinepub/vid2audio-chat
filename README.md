@@ -1,2 +1,3 @@
-# vid2audio-chat
-Exported from Caffeine project: Vid2Audio Chat
+## Vid2Audio Chat
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

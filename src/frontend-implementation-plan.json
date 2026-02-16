@@ -1,0 +1,164 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Vid2Audio Chat — Frontend-only conversational video-to-audio converter",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Build a chat-style UI that accepts either a video URL or a local video upload, then prompts for MP3/WAV format and starts conversion.",
+      "acceptanceCriteria": [
+        "The main screen presents a chat-like message thread with an input area that supports both: (a) pasting a URL and (b) selecting a local video file to upload.",
+        "After a URL is provided or a file is selected, the UI prompts for output format (MP3 or WAV) and a Convert action.",
+        "User-facing text is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "create",
+          "description": "Create the main app shell that renders a single chat-style screen (no extra routes) containing the conversation thread and the input/composer area for URL paste and file selection. Use shadcn-ui building blocks (e.g., Button/Input/Card/Select) to compose the UI; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/chat/ChatScreen.tsx",
+          "operation": "create",
+          "description": "Implement the chat-style layout: message thread, assistant/user bubbles, and a composer that supports (1) URL input and (2) local video file picker, then prompts for output format selection (MP3/WAV) and a Convert action. Use shadcn-ui components for consistent controls; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/chat/components/ChatComposer.tsx",
+          "operation": "create",
+          "description": "Create a reusable composer component that manages URL input, file selection, format selection, and the Convert button enable/disable rules. Use shadcn-ui form controls and consistent disabled/focus states; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/chat/components/ChatThread.tsx",
+          "operation": "create",
+          "description": "Create a chat thread component to render conversion job items as conversation messages (including timestamps and statuses), keeping the UX conversational rather than a traditional form. Use shadcn-ui Card/Badge-like patterns where appropriate; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Convert uploaded video files to MP3/WAV client-side with progress/busy state, error handling, and downloadable output with metadata.",
+      "acceptanceCriteria": [
+        "User can select a local video file and convert it to MP3.",
+        "User can select a local video file and convert it to WAV.",
+        "During conversion, the UI shows progress and a clear busy state (e.g., converting…).",
+        "After conversion completes, the UI provides a download link/button for the generated audio file and displays basic metadata (output format and filename).",
+        "If conversion fails, the UI shows an error message and does not crash."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/conversion/useConversionMutation.ts",
+          "operation": "create",
+          "description": "Create a React Query mutation hook that runs client-side conversion, exposes busy/progress state, and returns a downloadable Blob/object URL plus metadata (format + filename). Use React Query (@tanstack/react-query) for mutation state management; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/conversion/convertVideoToAudio.ts",
+          "operation": "create",
+          "description": "Implement browser-side conversion utilities for uploaded video files: extract/record audio from the video in-browser, encode to WAV directly, and encode to MP3 using a bundled client-side encoder library. Provide progress callbacks, robust error handling, and clean-up of temporary object URLs."
+        },
+        {
+          "path": "frontend/public/vendor/lame.min.js",
+          "operation": "create",
+          "description": "Add a vendored, browser-compatible MP3 encoder bundle (e.g., lamejs build) as a static asset used for MP3 generation in the client. Ensure licensing notes are respected."
+        },
+        {
+          "path": "frontend/src/types/vendor-lame.d.ts",
+          "operation": "create",
+          "description": "Add TypeScript ambient typings for the vendored MP3 encoder global/module surface used by the conversion utilities to keep the build type-safe."
+        },
+        {
+          "path": "frontend/src/features/chat/ChatScreen.tsx",
+          "operation": "modify",
+          "description": "Wire the conversion mutation into the chat UI: show converting/busy state, render progress, and on success render a download action and metadata (output format + filename) within the conversation thread; on failure render a clear English error message. Use shadcn-ui Button/Progress styling for states; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Allow conversion from a pasted link when browser fetch is possible; validate URLs and provide clear fallback instructions when links are inaccessible.",
+      "acceptanceCriteria": [
+        "User can paste a direct video file URL that is publicly accessible and convert it to MP3.",
+        "User can paste a direct video file URL that is publicly accessible and convert it to WAV.",
+        "If the pasted URL cannot be fetched in the browser, the app shows a clear English error explaining that the link is not accessible for conversion and suggests uploading the file instead.",
+        "The app validates URL input and prevents starting conversion with an empty/invalid URL."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/conversion/fetchVideoFromUrl.ts",
+          "operation": "create",
+          "description": "Implement a small helper that validates a URL, attempts to fetch it as a Blob when CORS/public access allows, infers a filename when possible, and returns a File/Blob suitable for the same conversion pipeline used for uploads. Provide error mapping for common failures (CORS/auth/opaque responses) to user-friendly English messages."
+        },
+        {
+          "path": "frontend/src/features/validation/urlValidation.ts",
+          "operation": "create",
+          "description": "Add URL validation helpers used by the composer to prevent conversion when the URL is empty/invalid and to normalize/trim input before attempting a fetch."
+        },
+        {
+          "path": "frontend/src/features/chat/components/ChatComposer.tsx",
+          "operation": "modify",
+          "description": "Integrate URL validation rules into the composer and disable Convert until a valid URL is present (for link mode) or a file is selected (for upload mode). Display clear English inline guidance when the URL is invalid. Use shadcn-ui form affordances for validation messaging; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/chat/ChatScreen.tsx",
+          "operation": "modify",
+          "description": "When input type is Link, attempt browser fetch and then run the same conversion flow as uploads; if fetching fails, append an assistant-style message explaining the link cannot be accessed for conversion and suggesting uploading the file instead (English text). Use shadcn-ui alert/toast patterns if available; verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Maintain an in-session conversion job history in the chat thread showing requests, statuses, timestamps, and results.",
+      "acceptanceCriteria": [
+        "Each conversion attempt appears as a discrete item in the conversation thread showing: input type (Link or Upload), chosen output format, status (Pending/Converting/Done/Failed), and timestamp (local time is acceptable).",
+        "Completed jobs keep a working download action for the generated audio (until page refresh)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/jobs/types.ts",
+          "operation": "create",
+          "description": "Define frontend-only types for conversion jobs (id, input type, source label, chosen format, status, timestamps, optional error, optional download URL/Blob) used to render the chat history."
+        },
+        {
+          "path": "frontend/src/features/jobs/useJobHistory.ts",
+          "operation": "create",
+          "description": "Create a lightweight state hook to append and update conversion jobs in-order within the same session (no persistence required), including status transitions (Pending → Converting → Done/Failed) and timestamp assignment."
+        },
+        {
+          "path": "frontend/src/features/chat/components/ChatThread.tsx",
+          "operation": "modify",
+          "description": "Render each conversion job as a discrete conversation item including input type (Link/Upload), chosen output format, status, and local timestamp; show a download action for Done items that remains usable until refresh. Use shadcn-ui components for consistent styling; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/chat/ChatScreen.tsx",
+          "operation": "modify",
+          "description": "Wire job history updates into user actions: append a job on Convert, update status/progress during conversion, and attach success download URL/metadata or failure reason into the job, all displayed in the same thread."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Apply a consistent, distinct visual theme (non-blue/purple dominant) across chat UI, controls, and interactive states.",
+      "acceptanceCriteria": [
+        "The app uses a consistent non-default visual theme across the primary screens/components.",
+        "The theme avoids a blue/purple dominant palette unless explicitly requested by the user (not requested here).",
+        "Interactive states (hover/focus/disabled/loading) are visually clear and consistent."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "create",
+          "description": "Create global styles/Tailwind layer definitions and set theme CSS variables (e.g., warm neutrals with amber/teal accents) to ensure a distinct non-blue/purple dominant palette. Include consistent focus/hover/disabled/loading styles aligned with shadcn-ui theming conventions."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Adjust Tailwind theme extensions (if needed) to support the chosen palette and spacing/typography consistency for the chat UI (e.g., subtle shadows, rounded corners, and readable message bubble sizing) while keeping styling consistent with the existing CSS variable approach."
+        },
+        {
+          "path": "frontend/src/features/chat/ChatScreen.tsx",
+          "operation": "modify",
+          "description": "Apply consistent Tailwind styling across the chat thread, bubbles, composer, conversion controls, and status states (pending/converting/done/failed) with clear interactive affordances. Use shadcn-ui components where appropriate for consistent behavior; verify the component's usage instructions before implementing."
+        }
+      ]
+    }
+  ]
+}

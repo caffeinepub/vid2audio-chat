@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Build an app that converts videos to audio (MP3/WAV) from either video links (embedded or direct) or uploaded video files.",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-a-conversational-chat-style-ui-where-a-user-can-either-paste-a-video-url-including-embedded-page-urls-or-direct-file-urls-or-upload-a-video-file-and-then-select-an-output-format-mp3-or-wav-to-start-a-conversion",
+      "title": "Create a conversational (chat-style) UI where a user can either paste a video URL (including embedded page URLs or direct file URLs) or upload a video file, and then select an output format (MP3 or WAV) to start a conversion.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-client-side-video-to-audio-conversion-for-uploaded-video-files-into-mp3-and-wav-and-allow-the-user-to-download-the-resulting-audio-file",
+      "title": "Implement client-side video-to-audio conversion for uploaded video files into MP3 and WAV, and allow the user to download the resulting audio file.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-support-converting-a-video-provided-via-a-link-to-mp3-or-wav-by-attempting-to-fetch-the-video-content-in-the-browser-when-possible-and-provide-clear-fallbacks-instructions-when-a-link-cannot-be-accessed-e-g-due-to-cors-auth-or-non-direct-unsupported-sources",
+      "title": "Support converting a video provided via a link to MP3 or WAV by attempting to fetch the video content in the browser when possible, and provide clear fallbacks/instructions when a link cannot be accessed (e.g., due to CORS, auth, or non-direct/unsupported sources).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-conversion-job-history-in-the-ui-within-the-same-chat-thread-that-records-each-conversion-request-and-its-result-success-with-download-link-or-failure-with-reason",
+      "title": "Add a conversion job history in the UI (within the same chat thread) that records each conversion request and its result (success with download link, or failure with reason).",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-establish-a-coherent-distinct-visual-theme-for-the-app-colors-typography-spacing-and-component-styling-and-apply-it-consistently-across-the-chat-thread-input-composer-conversion-controls-and-status-states",
+      "title": "Establish a coherent, distinct visual theme for the app (colors, typography, spacing, and component styling) and apply it consistently across the chat thread, input composer, conversion controls, and status states.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Support converting a video provided via any link (embedded or direct) into MP3 or WAV",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Support converting an uploaded video file into MP3 or WAV",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Vid2Audio Chat",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

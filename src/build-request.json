@@ -1,0 +1,109 @@
+{
+  "kind": "build_request",
+  "title": "Conversational video-to-audio converter (MP3/WAV) for links and uploads",
+  "projectName": "Vid2Audio Chat",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create a conversational (chat-style) UI where a user can either paste a video URL (including embedded page URLs or direct file URLs) or upload a video file, and then select an output format (MP3 or WAV) to start a conversion.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Give me a conversation app that will convert any video uploaded via any link weather the links embedded or not to mp3 or wav it will also allow you to convert any uploaded video to mp3 or wav"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The main screen presents a chat-like message thread with an input area that supports both: (a) pasting a URL and (b) selecting a local video file to upload.",
+        "After a URL is provided or a file is selected, the UI prompts for output format (MP3 or WAV) and a Convert action.",
+        "User-facing text is in English."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement client-side video-to-audio conversion for uploaded video files into MP3 and WAV, and allow the user to download the resulting audio file.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "it will also allow you to convert any uploaded video to mp3 or wav"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can select a local video file and convert it to MP3.",
+        "User can select a local video file and convert it to WAV.",
+        "During conversion, the UI shows progress and a clear busy state (e.g., converting…).",
+        "After conversion completes, the UI provides a download link/button for the generated audio file and displays basic metadata (output format and filename).",
+        "If conversion fails, the UI shows an error message and does not crash."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Support converting a video provided via a link to MP3 or WAV by attempting to fetch the video content in the browser when possible, and provide clear fallbacks/instructions when a link cannot be accessed (e.g., due to CORS, auth, or non-direct/unsupported sources).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "convert any video uploaded via any link weather the links embedded or not to mp3 or wav"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can paste a direct video file URL that is publicly accessible and convert it to MP3.",
+        "User can paste a direct video file URL that is publicly accessible and convert it to WAV.",
+        "If the pasted URL cannot be fetched in the browser, the app shows a clear English error explaining that the link is not accessible for conversion and suggests uploading the file instead.",
+        "The app validates URL input and prevents starting conversion with an empty/invalid URL."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Add a conversion job history in the UI (within the same chat thread) that records each conversion request and its result (success with download link, or failure with reason).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each conversion attempt appears as a discrete item in the conversation thread showing: input type (Link or Upload), chosen output format, status (Pending/Converting/Done/Failed), and timestamp (local time is acceptable).",
+        "Completed jobs keep a working download action for the generated audio (until page refresh)."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Establish a coherent, distinct visual theme for the app (colors, typography, spacing, and component styling) and apply it consistently across the chat thread, input composer, conversion controls, and status states.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The app uses a consistent non-default visual theme across the primary screens/components.",
+        "The theme avoids a blue/purple dominant palette unless explicitly requested by the user (not requested here).",
+        "Interactive states (hover/focus/disabled/loading) are visually clear and consistent."
+      ]
+    }
+  ],
+  "constraints": [
+    "Use React + TypeScript with Tailwind/Shadcn and React Query where appropriate.",
+    "Do not modify any files under frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui.",
+    "Backend must remain a single Motoko actor (only add backend work if required by the feature).",
+    "All user-facing text must be in English."
+  ],
+  "nonGoals": [
+    "Guarantee conversion from every possible embedded video page (e.g., sites requiring authentication, DRM-protected sources, or sources that cannot be fetched due to browser CORS restrictions).",
+    "Real-time chat/messaging with other users (this is a chat-style UI, not a multi-user chat system).",
+    "Third-party authentication beyond Internet Identity."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}
