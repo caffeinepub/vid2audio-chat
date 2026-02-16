@@ -4,8 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Link2, Upload, Sparkles } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Link2, Upload, Sparkles, AlertTriangle } from 'lucide-react';
 import { isValidUrl } from '../../validation/urlValidation';
+import { detectRestrictedSource, getRestrictedSourceWarning } from '../../conversion/restrictedSources';
 
 interface ChatComposerProps {
   onConvert: (inputType: 'link' | 'upload', source: string | File, format: 'mp3' | 'wav') => void;
@@ -22,6 +24,9 @@ export default function ChatComposer({ onConvert, isProcessing }: ChatComposerPr
     !isProcessing &&
     format &&
     ((inputType === 'link' && isValidUrl(url)) || (inputType === 'upload' && file !== null));
+
+  // Check if the URL is from a restricted source
+  const restrictedSource = inputType === 'link' && url ? detectRestrictedSource(url) : null;
 
   const handleConvert = () => {
     if (!canConvert) return;
@@ -66,6 +71,14 @@ export default function ChatComposer({ onConvert, isProcessing }: ChatComposerPr
             />
             {url && !isValidUrl(url) && (
               <p className="text-xs text-destructive">Please enter a valid URL</p>
+            )}
+            {restrictedSource && isValidUrl(url) && (
+              <Alert variant="destructive" className="mt-2">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  {getRestrictedSourceWarning(restrictedSource)}
+                </AlertDescription>
+              </Alert>
             )}
           </div>
         </TabsContent>

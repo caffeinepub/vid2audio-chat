@@ -1,11 +1,18 @@
 import { isValidUrl, normalizeUrl } from '../validation/urlValidation';
 import { isVideoBlob } from './videoValidation';
+import { detectRestrictedSource, getRestrictedSourceError } from './restrictedSources';
 
 export async function fetchVideoFromUrl(url: string): Promise<File> {
   const normalizedUrl = normalizeUrl(url);
   
   if (!isValidUrl(normalizedUrl)) {
     throw new Error('Invalid URL format. Please enter a valid http:// or https:// URL.');
+  }
+
+  // Check if this is a restricted source (YouTube, TikTok, etc.)
+  const restrictedSource = detectRestrictedSource(normalizedUrl);
+  if (restrictedSource) {
+    throw new Error(getRestrictedSourceError(restrictedSource));
   }
 
   let finalUrl = normalizedUrl;
@@ -18,9 +25,13 @@ export async function fetchVideoFromUrl(url: string): Promise<File> {
       redirect: 'follow',
     });
 
-    // If we got redirected, update the final URL
+    // If we got redirected, update the final URL and check if it's restricted
     if (response.url && response.url !== normalizedUrl) {
       finalUrl = response.url;
+      const redirectedSource = detectRestrictedSource(finalUrl);
+      if (redirectedSource) {
+        throw new Error(getRestrictedSourceError(redirectedSource));
+      }
     }
 
     if (!response.ok) {
@@ -72,6 +83,12 @@ export async function fetchVideoFromUrl(url: string): Promise<File> {
   } catch (error) {
     if (error instanceof TypeError) {
       if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        // Check if the original URL was a restricted source
+        const sourceType = detectRestrictedSource(normalizedUrl);
+        if (sourceType) {
+          throw new Error(getRestrictedSourceError(sourceType));
+        }
+        
         throw new Error(
           'Unable to access the video. The source may block browser access (CORS), require authentication, or use anti-bot protection. Please try: (1) providing a direct video file URL, or (2) downloading and uploading the video file directly.'
         );
@@ -84,7 +101,8 @@ export async function fetchVideoFromUrl(url: string): Promise<File> {
       error.message.includes('Access denied') ||
       error.message.includes('not found') ||
       error.message.includes('does not point to') ||
-      error.message.includes('Unable to access')
+      error.message.includes('Unable to access') ||
+      error.message.includes('cannot be accessed')
     )) {
       throw error;
     }

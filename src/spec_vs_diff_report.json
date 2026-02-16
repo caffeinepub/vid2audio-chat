@@ -1,35 +1,55 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-16T22:13:38.971Z",
-  "summary": "The diff implements best-effort URL fetching with redirect following and tolerant blob/video validation, adds more specific English URL error messages, and hardens the client-side MP3 encoding pipeline to avoid uncaught exceptions and ensure jobs end in Done/Failed. However, the diff also appears to include unrelated UI/theme/config additions not requested by REQ-6/7/8.",
+  "generatedAt": "2026-02-16T22:26:15.130Z",
+  "summary": "REQ-12/13/14 are largely implemented via a new restricted-source detection utility, early fail-fast behavior in the link conversion flow, inline URL warnings in the input UI, and tailored error messaging for YouTube/TikTok. The diff also includes several unrelated UI/theme/encoding/library changes that were not requested in this BuildRequest.",
   "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "Introduced/modified global visual theme (colors/palette) and Tailwind configuration changes unrelated to the TikTok fetch messaging or MP3 crash fix.",
-      "reason": "REQ-6/REQ-7/REQ-8 focus on conversion crash hardening and URL-fetch/error messaging; theme changes are not requested in this BuildRequest.",
+      "description": "Added/changed chat UI behavior and layout features (auto-scroll management, dedicated scrollable thread container, and a \"Scroll to latest\" button).",
+      "reason": "Not requested by REQ-12/13/14, which are specifically about restricted-source detection/warnings/error classification for YouTube/TikTok links.",
       "evidence": [
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js"
+        "frontend/src/features/chat/ChatScreen.tsx",
+        "frontend-file-summaries.txt"
       ]
     },
     {
-      "description": "Added an empty placeholder hook file (useQueries.ts).",
-      "reason": "No requirement asks for adding new hooks or placeholder files; BuildRequest also emphasizes frontend-only changes for these issues, but not adding unrelated scaffolding.",
+      "description": "Global theme/styling changes (warm amber/orange color system, viewport-height CSS variable behavior, body scroll confinement) and Tailwind theme extensions.",
+      "reason": "Not requested by REQ-12/13/14.",
       "evidence": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js",
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "MP3 encoding pipeline hardening and addition of a bundled lamejs vendor library and type declarations.",
+      "reason": "Not requested by REQ-12/13/14 (these requirements concern link handling for YouTube/TikTok).",
+      "evidence": [
+        "frontend/src/features/conversion/convertVideoToAudio.ts",
+        "frontend/public/vendor/lame.min.js",
+        "frontend/src/types/vendor-lame.d.ts",
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "Added new hooks and placeholder queries file (useChatAutoScroll, useAppViewportHeight, empty useQueries placeholder).",
+      "reason": "Not requested by REQ-12/13/14.",
+      "evidence": [
+        "frontend/src/hooks/useChatAutoScroll.ts",
+        "frontend/src/hooks/useAppViewportHeight.ts",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend-file-summaries.txt"
       ]
     }
   ],
-  "confidence": 0.72,
+  "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
     "frontend/src/features/chat/ChatScreen.tsx",
-    "frontend/src/features/chat/components/ChatThread.tsx",
-    "frontend/src/features/conversion/convertVideoToAudio.ts",
+    "frontend/src/features/chat/components/ChatComposer.tsx",
     "frontend/src/features/conversion/fetchVideoFromUrl.ts",
-    "frontend/src/features/conversion/videoValidation.ts",
-    "frontend/src/features/validation/urlValidation.ts",
+    "frontend/src/features/conversion/restrictedSources.ts",
     "project_state.json"
   ]
 }

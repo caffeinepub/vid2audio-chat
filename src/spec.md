@@ -1,12 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Make URL-based TikTok conversions more resilient and improve frontend error handling so MP3 conversions never crash and failures provide clear, accurate English messaging.
+**Goal:** Improve the user experience and error guidance when converting YouTube/TikTok links that typically cannot be fetched directly in the browser.
 
 **Planned changes:**
-- Harden the client-side MP3 encoding/conversion pipeline to prevent uncaught exceptions (e.g., null buffer errors) and ensure jobs reliably end as Done (with download) or Failed (with a user-friendly English error).
-- Improve URL fetch/resolution for TikTok short links by following redirects and attempting best-effort retrieval of the underlying video content before failing.
-- Relax overly strict response validation so conversion can proceed when a fetched Blob is convertible even if Content-Type is missing or is `application/octet-stream` (instead of requiring `video/*`).
-- Update URL fetch failure messages to be English, specific (invalid URL vs blocked fetch vs non-video response), and accurate about third-party access limitations while noting the app will try multiple strategies.
+- Detect YouTube (youtube.com, youtu.be) and TikTok (tiktok.com) URLs early in the link conversion flow and fail fast with a tailored English error that explains common browser access restrictions (CORS/auth/anti-bot) and instructs users to download and upload the video file instead.
+- Add an English inline warning in the URL input UI when a YouTube or TikTok link is pasted, while still allowing users to attempt conversion.
+- Refine fetch failure classification so YouTube/TikTok fetch errors show the tailored guidance instead of the generic “Unable to access the video” message, while keeping existing English error specificity for other URLs.
 
-**User-visible outcome:** Users can upload a video and convert it to MP3 without the UI crashing; URL-based conversions (including TikTok short links) try more reliably to fetch and convert videos, and when something can’t be accessed, the app shows clear English failure reasons and suggested alternatives.
+**User-visible outcome:** When users paste YouTube or TikTok links, they see an upfront warning and, if conversion fails, a fast, clear English message explaining why and telling them to download the video and upload it as a file instead; other URLs continue to behave as before with specific English errors.

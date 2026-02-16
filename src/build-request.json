@@ -1,72 +1,73 @@
 {
   "kind": "build_request",
-  "title": "Fix TikTok URL fetch failure messaging and MP3 conversion crash",
+  "title": "Improve handling of YouTube/TikTok links that cannot be fetched in-browser",
   "projectName": "Vid2Audio Chat",
-  "priority": "high",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-6",
-      "text": "Fix the MP3 conversion crash that can occur when converting an uploaded video file (e.g., error: \"Cannot read properties of null (reading 'copy_buffer')\") by hardening the MP3 encoding pipeline so the app either (a) successfully produces an MP3 download or (b) fails gracefully with a clear English error message (no uncaught exceptions).",
+      "id": "REQ-12",
+      "text": "Detect YouTube and TikTok URLs early in the link-conversion flow and fail fast with a specific, English error message explaining that these sites typically cannot be fetched directly by the browser due to CORS/auth/anti-bot restrictions, and instruct the user to download the video and upload the file instead.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "user-msg-1"
         ],
         "quotes": [
-          "Cannot read properties of null (reading 'copy_buffer'\n\nFix these errors I should have no restrictions"
+          "It's only YouTube link tiktok link said same issue , fix it https://youtu.be/pocCdsKX21s?si=d5mz9IZWbHGEmsm2"
         ]
       },
       "acceptanceCriteria": [
-        "Uploading a video file and converting to MP3 no longer throws an uncaught exception in the UI; the job ends in either Done (with a working download) or Failed (with a user-friendly English error).",
-        "The error string \"Cannot read properties of null (reading 'copy_buffer')\" is never shown to the user; it is replaced with an actionable, user-facing message.",
-        "The conversion job history correctly updates status/progress during MP3 conversion and ends in a stable state (Done/Failed) without leaving the UI stuck in Processing."
+        "When the user submits https://youtu.be/pocCdsKX21s?si=d5mz9IZWbHGEmsm2, the job fails quickly without waiting for a long fetch attempt.",
+        "The displayed error is in English and explicitly mentions YouTube (and similarly TikTok) links are often not directly accessible from the browser due to CORS/auth/anti-bot restrictions.",
+        "The error message provides a clear next step: download the video and upload it as a file to convert."
       ]
     },
     {
-      "id": "REQ-7",
-      "text": "Improve link-based conversion so that when a user provides a TikTok short-link URL (e.g., https://www.tiktok.com/t/ZP89Kbbbe/), the app performs a best-effort attempt to resolve the link and fetch the underlying video content (including following redirects and tolerating non-\"video/*\" content-types when the response is still a video blob), and only fails when it is truly not accessible.",
+      "id": "REQ-13",
+      "text": "Update the URL input UI to proactively warn users (in English) when they paste a YouTube or TikTok link that the app may not be able to access it, while still allowing them to attempt conversion.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "user-msg-1"
         ],
         "quotes": [
-          "https://www.tiktok.com/t/ZP89Kbbbe/\n\nUnable to access the video URL. This may be due to CORS restrictions, authentication requirements, or the link being inaccessible. Please try uploading the video file directly instead.\n...\nFix these errors I should have no restrictions"
+          "Unable to access the video... It's only YouTube link tiktok link said same issue"
         ]
       },
       "acceptanceCriteria": [
-        "For URL conversion, the fetch flow follows redirects and attempts to fetch the final resolved URL before failing.",
-        "If the fetched response is a Blob that can be converted (even when the Content-Type header is missing or is \"application/octet-stream\"), the app proceeds to conversion instead of immediately failing on strict \"video/*\" header checks.",
-        "When the video cannot be accessed due to third-party restrictions (CORS/auth/anti-bot), the job ends as Failed with a clear English message explaining that the source site blocked programmatic access in the browser, and suggests alternatives (e.g., providing a direct media file URL or uploading the file) without implying a bug in the app."
+        "When a YouTube URL (youtube.com or youtu.be) is present in the URL input, the UI shows an English inline warning that YouTube links often cannot be fetched directly and suggests uploading the file.",
+        "When a TikTok URL (tiktok.com) is present in the URL input, the UI shows an equivalent English inline warning.",
+        "The Convert button behavior remains unchanged (users can still try), but the warning appears before they submit."
       ]
     },
     {
-      "id": "REQ-8",
-      "text": "Update user-facing error messages for URL fetch failures so they remain in English, are specific about what failed (invalid URL vs. fetch blocked vs. non-video response), and avoid promising \"no restrictions\" while still communicating that the app will attempt multiple strategies to access links.",
+      "id": "REQ-14",
+      "text": "Refine link-fetch failure classification so that when a fetch fails for known restricted sources (YouTube/TikTok), the app reports the tailored guidance instead of the generic \"Unable to access the video\" message, and preserves English-only user-facing text.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "user-msg-1"
         ],
         "quotes": [
-          "Fix these errors I should have no restrictions"
+          "Unable to access the video. The source may block browser access (CORS), require authentication, or use anti-bot protection."
         ]
       },
       "acceptanceCriteria": [
-        "URL fetch errors shown in the chat thread distinguish at least: invalid URL, could not fetch due to network/CORS/auth restrictions, and fetched content not recognized as a video.",
-        "No user-facing text claims that all third-party links will always be accessible; messaging is accurate and in English."
+        "For YouTube/TikTok URLs that result in fetch errors, the final job error shown in the chat thread uses the tailored, source-specific guidance rather than the generic message.",
+        "For non-YouTube/TikTok URLs, existing error messages remain English, specific, and continue to distinguish invalid URL vs access denied vs not found vs non-video response where possible.",
+        "No user-facing error text is shown in any language other than English."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/components/ui (shadcn components); compose them from feature components instead.",
-    "Do not modify frontend immutable hook files: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx.",
-    "Backend is a single Motoko actor in backend/main.mo; only add backend changes if strictly required (this request can be satisfied on the frontend)."
+    "Do not add server-side downloading or processing; the app must remain client-side for link fetching and conversion.",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui (compose them instead).",
+    "Keep backend as a single Motoko actor; do not introduce additional backend services."
   ],
   "nonGoals": [
-    "Guaranteeing access to all third-party video providers/URLs (e.g., TikTok) regardless of CORS, authentication, DRM, or anti-bot restrictions.",
-    "Adding third-party authentication providers beyond Internet Identity.",
-    "Adding a server-side video downloader/processor pipeline (all conversion remains client-side)."
+    "Bypassing YouTube/TikTok anti-bot protections or implementing a YouTube/TikTok downloader/extractor.",
+    "Adding third-party APIs or external proxy services to fetch restricted video sources.",
+    "Implementing server-side video conversion or storage."
   ],
   "imageRequirements": {
     "required": [],

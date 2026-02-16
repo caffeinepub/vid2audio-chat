@@ -2,11 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-mp3-conversion-crash-that-can-occur-when-converting-an-uploaded-video-file-e-g-error-cannot-read-properties-of-null-reading-copy-buffer-by-hardening-the-mp3-encoding-pipeline-so-the-app-either-a-successfully-produces-an-mp3-download-or-b-fails-gracefully-with-a-clear-english-error-message-no-uncaught-exceptions",
-      "featureTitle": "Fix the MP3 conversion crash that can occur when converting an uploaded video file (e.g., error: \"Cannot read properties of null (reading 'copy_buffer')\") by hardening the MP3 encoding pipeline so the app either (a) successfully produces an MP3 download or (b) fails gracefully with a clear English error message (no uncaught exceptions).",
+      "featureId": "feature-detect-youtube-and-tiktok-urls-early-in-the-link-conversion-flow-and-fail-fast-with-a-specific-english-error-message-explaining-that-these-sites-typically-cannot-be-fetched-directly-by-the-browser-due-to-cors-auth-anti-bot-restrictions-and-instruct-the-user-to-download-the-video-and-upload-the-file-instead",
+      "featureTitle": "Detect YouTube and TikTok URLs early in the link-conversion flow and fail fast with a specific, English error message explaining that these sites typically cannot be fetched directly by the browser due to CORS/auth/anti-bot restrictions, and instruct the user to download the video and upload the file instead.",
       "files": [
         "frontend/src/features/chat/ChatScreen.tsx",
-        "frontend/src/features/conversion/convertVideoToAudio.ts"
+        "frontend/src/features/conversion/fetchVideoFromUrl.ts",
+        "frontend/src/features/conversion/restrictedSources.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -16,16 +17,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-6"
+        "REQ-12"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-improve-link-based-conversion-so-that-when-a-user-provides-a-tiktok-short-link-url-e-g-https-www-tiktok-com-t-zp89kbbbe-the-app-performs-a-best-effort-attempt-to-resolve-the-link-and-fetch-the-underlying-video-content-including-following-redirects-and-tolerating-non-video-content-types-when-the-response-is-still-a-video-blob-and-only-fails-when-it-is-truly-not-accessible",
-      "featureTitle": "Improve link-based conversion so that when a user provides a TikTok short-link URL (e.g., https://www.tiktok.com/t/ZP89Kbbbe/), the app performs a best-effort attempt to resolve the link and fetch the underlying video content (including following redirects and tolerating non-\"video/*\" content-types when the response is still a video blob), and only fails when it is truly not accessible.",
+      "featureId": "feature-update-the-url-input-ui-to-proactively-warn-users-in-english-when-they-paste-a-youtube-or-tiktok-link-that-the-app-may-not-be-able-to-access-it-while-still-allowing-them-to-attempt-conversion",
+      "featureTitle": "Update the URL input UI to proactively warn users (in English) when they paste a YouTube or TikTok link that the app may not be able to access it, while still allowing them to attempt conversion.",
       "files": [
-        "frontend/src/features/conversion/fetchVideoFromUrl.ts",
-        "frontend/src/features/conversion/videoValidation.ts"
+        "frontend/src/features/chat/components/ChatComposer.tsx",
+        "frontend/src/features/conversion/restrictedSources.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -35,16 +36,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-7"
+        "REQ-13"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-user-facing-error-messages-for-url-fetch-failures-so-they-remain-in-english-are-specific-about-what-failed-invalid-url-vs-fetch-blocked-vs-non-video-response-and-avoid-promising-no-restrictions-while-still-communicating-that-the-app-will-attempt-multiple-strategies-to-access-links",
-      "featureTitle": "Update user-facing error messages for URL fetch failures so they remain in English, are specific about what failed (invalid URL vs. fetch blocked vs. non-video response), and avoid promising \"no restrictions\" while still communicating that the app will attempt multiple strategies to access links.",
+      "featureId": "feature-refine-link-fetch-failure-classification-so-that-when-a-fetch-fails-for-known-restricted-sources-youtube-tiktok-the-app-reports-the-tailored-guidance-instead-of-the-generic-unable-to-access-the-video-message-and-preserves-english-only-user-facing-text",
+      "featureTitle": "Refine link-fetch failure classification so that when a fetch fails for known restricted sources (YouTube/TikTok), the app reports the tailored guidance instead of the generic \"Unable to access the video\" message, and preserves English-only user-facing text.",
       "files": [
-        "frontend/src/features/conversion/fetchVideoFromUrl.ts",
-        "frontend/src/features/validation/urlValidation.ts"
+        "frontend/src/features/chat/ChatScreen.tsx",
+        "frontend/src/features/conversion/fetchVideoFromUrl.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -54,7 +55,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-8"
+        "REQ-14"
       ],
       "confidence": "high"
     }

@@ -1,72 +1,73 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix URL fetch messaging + harden MP3 conversion for Vid2Audio Chat",
+  "title": "Vid2Audio Chat — Better handling for restricted YouTube/TikTok URL fetching",
   "requirements": [
     {
-      "id": "REQ-6",
-      "summary": "Harden client-side MP3 encoding so conversion never crashes and always ends in Done (download) or Failed (friendly English error) with stable progress updates.",
+      "id": "REQ-12",
+      "summary": "Fail fast for YouTube/TikTok URLs during link conversion with a tailored English message directing users to download and upload instead.",
       "acceptanceCriteria": [
-        "Uploading a video file and converting to MP3 no longer throws an uncaught exception in the UI; the job ends in either Done (with a working download) or Failed (with a user-friendly English error).",
-        "The error string \"Cannot read properties of null (reading 'copy_buffer')\" is never shown to the user; it is replaced with an actionable, user-facing message.",
-        "The conversion job history correctly updates status/progress during MP3 conversion and ends in a stable state (Done/Failed) without leaving the UI stuck in Processing."
+        "When the user submits https://youtu.be/pocCdsKX21s?si=d5mz9IZWbHGEmsm2, the job fails quickly without waiting for a long fetch attempt.",
+        "The displayed error is in English and explicitly mentions YouTube (and similarly TikTok) links are often not directly accessible from the browser due to CORS/auth/anti-bot restrictions.",
+        "The error message provides a clear next step: download the video and upload it as a file to convert."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/conversion/convertVideoToAudio.ts",
-          "operation": "modify",
-          "description": "Add defensive checks and error hardening around AudioBuffer decoding and MP3 encoding (guard unsupported channel/sample-rate cases, wrap/normalize lamejs failures, ensure URL.revokeObjectURL and AudioContext cleanup in finally). Ensure any internal exceptions (including copy_buffer-related crashes) are converted into clear English user-facing errors and never leak raw internal messages; keep onProgress updates consistent so the UI reaches a terminal Done/Failed state."
+          "path": "frontend/src/features/conversion/restrictedSources.ts",
+          "operation": "create",
+          "description": "Add URL classification helpers to detect restricted sources (YouTube/TikTok) from user input and from post-redirect/final URLs; export a small API (e.g., detectRestrictedSource(url) -> 'youtube'|'tiktok'|null) used by the link-fetch and UI layers."
         },
         {
           "path": "frontend/src/features/chat/ChatScreen.tsx",
           "operation": "modify",
-          "description": "Ensure conversion failures from the MP3 pipeline are surfaced as user-friendly English messages and that job status/progress always transitions to a terminal state (done/failed) without leaving jobs stuck in converting; avoid displaying raw internal exception strings to the user."
+          "description": "Detect YouTube/TikTok URLs before starting the fetch step in the link-conversion flow, and immediately mark the job as failed with a specific English error message instructing the user to download the video and upload the file instead (no long fetch attempt)."
+        },
+        {
+          "path": "frontend/src/features/conversion/fetchVideoFromUrl.ts",
+          "operation": "modify",
+          "description": "Add an early restricted-source guard (YouTube/TikTok) using the shared helper so fetchVideoFromUrl fails fast with the tailored English guidance, without initiating fetch for those sources."
         }
       ]
     },
     {
-      "id": "REQ-7",
-      "summary": "Improve TikTok short-link and general URL-based conversion by best-effort redirect resolution and tolerant video blob handling before failing.",
+      "id": "REQ-13",
+      "summary": "Show an inline English warning in the URL input when a YouTube or TikTok link is detected, while keeping Convert behavior unchanged.",
       "acceptanceCriteria": [
-        "For URL conversion, the fetch flow follows redirects and attempts to fetch the final resolved URL before failing.",
-        "If the fetched response is a Blob that can be converted (even when the Content-Type header is missing or is \"application/octet-stream\"), the app proceeds to conversion instead of immediately failing on strict \"video/*\" header checks.",
-        "When the video cannot be accessed due to third-party restrictions (CORS/auth/anti-bot), the job ends as Failed with a clear English message explaining that the source site blocked programmatic access in the browser, and suggests alternatives (e.g., providing a direct media file URL or uploading the file) without implying a bug in the app."
+        "When a YouTube URL (youtube.com or youtu.be) is present in the URL input, the UI shows an English inline warning that YouTube links often cannot be fetched directly and suggests uploading the file.",
+        "When a TikTok URL (tiktok.com) is present in the URL input, the UI shows an equivalent English inline warning.",
+        "The Convert button behavior remains unchanged (users can still try), but the warning appears before they submit."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/chat/components/ChatComposer.tsx",
+          "operation": "modify",
+          "description": "Use the shared restricted-source URL detection helper to show an inline warning when the current URL looks like YouTube or TikTok, while still enabling the existing Convert flow. Use shadcn-ui's Alert component to present the warning consistently (Verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/features/conversion/restrictedSources.ts",
+          "operation": "modify",
+          "description": "Ensure the restricted-source helper covers the required host patterns (youtube.com, youtu.be, tiktok.com) so the composer can warn proactively and consistently."
+        }
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "summary": "Classify link-fetch failures so YouTube/TikTok errors show tailored guidance instead of the generic message, keeping all user-facing text English-only.",
+      "acceptanceCriteria": [
+        "For YouTube/TikTok URLs that result in fetch errors, the final job error shown in the chat thread uses the tailored, source-specific guidance rather than the generic message.",
+        "For non-YouTube/TikTok URLs, existing error messages remain English, specific, and continue to distinguish invalid URL vs access denied vs not found vs non-video response where possible.",
+        "No user-facing error text is shown in any language other than English."
       ],
       "file_operations": [
         {
           "path": "frontend/src/features/conversion/fetchVideoFromUrl.ts",
           "operation": "modify",
-          "description": "Implement a best-effort URL fetch strategy tailored for short-links: follow redirects (and, when possible, retry using the resolved final URL), tolerate missing/opaque Content-Type by validating via blob inspection/playability checks, and only fail when the content is truly not accessible or not a video. Map third-party blocking cases (CORS/auth/anti-bot) to a clear English message explaining browser limitations and suggesting alternatives (direct media URL or upload)."
+          "description": "Refine fetch error handling to prefer the YouTube/TikTok tailored guidance when the original URL or final/redirected URL is a restricted source (including TypeError/network failures), while preserving existing English error distinctions for non-restricted sources."
         },
         {
-          "path": "frontend/src/features/conversion/videoValidation.ts",
-          "operation": "create",
-          "description": "Add helper(s) to determine whether a fetched Blob is likely a playable video (e.g., by attempting to load metadata via a temporary HTMLVideoElement using an object URL and/or lightweight signature checks) so the app can proceed when Content-Type is missing or generic."
-        }
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "summary": "Update user-facing URL fetch failure messaging to be specific (invalid URL vs blocked vs not-video), accurate, and consistently English without claiming universal access.",
-      "acceptanceCriteria": [
-        "URL fetch errors shown in the chat thread distinguish at least: invalid URL, could not fetch due to network/CORS/auth restrictions, and fetched content not recognized as a video.",
-        "No user-facing text claims that all third-party links will always be accessible; messaging is accurate and in English."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/conversion/fetchVideoFromUrl.ts",
+          "path": "frontend/src/features/chat/ChatScreen.tsx",
           "operation": "modify",
-          "description": "Refine thrown errors into distinct, user-facing English messages for: invalid URL, fetch blocked (network/CORS/auth/anti-bot), fetch failed (HTTP not OK), and non-video/not-recognized content. Ensure messages are accurate (no promises of universal access) while stating the app will attempt multiple strategies (redirect follow + tolerant blob handling)."
-        },
-        {
-          "path": "frontend/src/features/chat/ChatThread.tsx",
-          "operation": "modify",
-          "description": "Ensure the chat thread displays the improved, specific English error messages for URL fetch failures cleanly (invalid URL vs blocked vs not-video) and does not show any misleading text implying all links are always accessible."
-        },
-        {
-          "path": "frontend/src/features/validation/urlValidation.ts",
-          "operation": "modify",
-          "description": "Optionally strengthen URL normalization/validation behavior used by the composer and fetch flow (trim/normalize consistently) to reduce false negatives and support clearer invalid-URL messaging while keeping the UI error text in English."
+          "description": "Ensure job failure messages shown in the chat thread use the refined, source-specific error text for YouTube/TikTok fetch failures (propagate thrown messages as-is) and keep fallback error strings English-only."
         }
       ]
     }

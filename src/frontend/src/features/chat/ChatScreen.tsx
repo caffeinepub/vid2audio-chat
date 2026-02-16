@@ -4,12 +4,25 @@ import ChatComposer from './components/ChatComposer';
 import { useJobHistory } from '../jobs/useJobHistory';
 import { useConversionMutation } from '../conversion/useConversionMutation';
 import { fetchVideoFromUrl } from '../conversion/fetchVideoFromUrl';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { detectRestrictedSource, getRestrictedSourceError } from '../conversion/restrictedSources';
+import { useAppViewportHeight } from '@/hooks/useAppViewportHeight';
+import { useChatAutoScroll } from '@/hooks/useChatAutoScroll';
+import { Button } from '@/components/ui/button';
+import { ArrowDown } from 'lucide-react';
 
 export default function ChatScreen() {
   const { jobs, addJob, updateJob } = useJobHistory();
   const [isProcessing, setIsProcessing] = useState(false);
   const conversionMutation = useConversionMutation();
+  
+  // Handle mobile viewport height
+  useAppViewportHeight();
+  
+  // Auto-scroll management
+  const { scrollContainerRef, isNearBottom, scrollToBottom, handleScroll } = useChatAutoScroll({
+    threshold: 100,
+    dependencies: [jobs.length, jobs[jobs.length - 1]?.status, jobs[jobs.length - 1]?.progress],
+  });
 
   const handleConvert = async (
     inputType: 'link' | 'upload',
@@ -30,6 +43,17 @@ export default function ChatScreen() {
       let fileToConvert: File;
 
       if (inputType === 'link' && typeof source === 'string') {
+        // Check for restricted sources before attempting fetch
+        const restrictedSource = detectRestrictedSource(source);
+        if (restrictedSource) {
+          updateJob(jobId, {
+            status: 'failed',
+            error: getRestrictedSourceError(restrictedSource),
+          });
+          setIsProcessing(false);
+          return;
+        }
+
         // Update status to fetching
         updateJob(jobId, { status: 'fetching', progress: 0 });
         
@@ -100,9 +124,9 @@ export default function ChatScreen() {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-gradient-to-br from-background via-background to-accent/5">
+    <div className="flex flex-col bg-gradient-to-br from-background via-background to-accent/5" style={{ height: 'var(--app-height, 100vh)' }}>
       {/* Header */}
-      <header className="border-b border-border/40 bg-card/50 backdrop-blur-sm">
+      <header className="shrink-0 border-b border-border/40 bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg">
@@ -128,19 +152,37 @@ export default function ChatScreen() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-hidden">
+      {/* Main Content - Scrollable Thread */}
+      <main className="relative flex-1 overflow-hidden">
         <div className="container mx-auto h-full px-4 py-6">
           <div className="flex h-full flex-col gap-4">
-            {/* Chat Thread */}
-            <ScrollArea className="flex-1 rounded-2xl border border-border/40 bg-card/30 backdrop-blur-sm">
-              <div className="p-4">
-                <ChatThread jobs={jobs} />
+            {/* Chat Thread - Scrollable Area */}
+            <div 
+              ref={scrollContainerRef}
+              onScroll={handleScroll}
+              className="flex-1 overflow-y-auto rounded-2xl border border-border/40 bg-card/30 p-4 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              tabIndex={0}
+              style={{ scrollPaddingTop: '1rem', scrollPaddingBottom: '1rem' }}
+            >
+              <ChatThread jobs={jobs} />
+            </div>
+
+            {/* Scroll to Latest Button */}
+            {!isNearBottom && (
+              <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-10">
+                <Button
+                  size="sm"
+                  onClick={() => scrollToBottom(true)}
+                  className="shadow-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+                >
+                  <ArrowDown className="mr-2 h-4 w-4" />
+                  Scroll to latest
+                </Button>
               </div>
-            </ScrollArea>
+            )}
 
             {/* Composer */}
-            <div className="rounded-2xl border border-border/40 bg-card/50 p-4 shadow-lg backdrop-blur-sm">
+            <div className="shrink-0 rounded-2xl border border-border/40 bg-card/50 p-4 shadow-lg backdrop-blur-sm">
               <ChatComposer onConvert={handleConvert} isProcessing={isProcessing} />
             </div>
           </div>
@@ -148,7 +190,7 @@ export default function ChatScreen() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm">
+      <footer className="shrink-0 border-t border-border/40 bg-card/30 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-3">
           <p className="text-center text-sm text-muted-foreground">
             © {new Date().getFullYear()} · Built with{' '}

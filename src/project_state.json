@@ -1,11 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 5,
+  "projectStateVersion": 9,
   "summary": "Build an app that converts videos to audio (MP3/WAV) from either video links (embedded or direct) or uploaded video files.",
   "architectural_notes": [],
   "known_issues": [
     "Converting a TikTok short-link URL fails with an \"Unable to access the video URL\" message (CORS/auth/non-direct source limitations).",
-    "Uploading a video and converting to MP3 can crash with \"Cannot read properties of null (reading 'copy_buffer')\" (null buffer/FFmpeg processing error)."
+    "Uploading a video and converting to MP3 can crash with \"Cannot read properties of null (reading 'copy_buffer')\" (null buffer/FFmpeg processing error).",
+    "Scrolling in the app UI is broken/undesirable and needs to be fixed.",
+    "YouTube links (e.g., youtu.be/...) are failing with the same \"Unable to access the video\" error as TikTok links (likely due to CORS/auth/anti-bot restrictions on link fetching in-browser)."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -72,6 +74,54 @@
         "REQ-8"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-fix-the-app-layout-so-the-chat-thread-scrolls-reliably-while-the-header-composer-and-footer-remain-visible-and-do-not-cause-nested-competing-scrollbars",
+      "title": "Fix the app layout so the chat thread scrolls reliably while the header, composer, and footer remain visible and do not cause nested/competing scrollbars.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-chat-thread-auto-scroll-behavior-is-user-friendly-keep-the-view-pinned-to-the-latest-job-updates-by-default-but-do-not-forcibly-scroll-if-the-user-has-manually-scrolled-up-to-read-earlier-jobs",
+      "title": "Ensure the chat thread auto-scroll behavior is user-friendly: keep the view pinned to the latest job updates by default, but do not forcibly scroll if the user has manually scrolled up to read earlier jobs.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-the-scrolling-behavior-robust-on-mobile-and-small-height-viewports-by-preventing-browser-ui-e-g-mobile-address-bar-from-breaking-the-visible-scrollable-region",
+      "title": "Make the scrolling behavior robust on mobile and small-height viewports by preventing browser UI (e.g., mobile address bar) from breaking the visible scrollable region.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-detect-youtube-and-tiktok-urls-early-in-the-link-conversion-flow-and-fail-fast-with-a-specific-english-error-message-explaining-that-these-sites-typically-cannot-be-fetched-directly-by-the-browser-due-to-cors-auth-anti-bot-restrictions-and-instruct-the-user-to-download-the-video-and-upload-the-file-instead",
+      "title": "Detect YouTube and TikTok URLs early in the link-conversion flow and fail fast with a specific, English error message explaining that these sites typically cannot be fetched directly by the browser due to CORS/auth/anti-bot restrictions, and instruct the user to download the video and upload the file instead.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-url-input-ui-to-proactively-warn-users-in-english-when-they-paste-a-youtube-or-tiktok-link-that-the-app-may-not-be-able-to-access-it-while-still-allowing-them-to-attempt-conversion",
+      "title": "Update the URL input UI to proactively warn users (in English) when they paste a YouTube or TikTok link that the app may not be able to access it, while still allowing them to attempt conversion.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refine-link-fetch-failure-classification-so-that-when-a-fetch-fails-for-known-restricted-sources-youtube-tiktok-the-app-reports-the-tailored-guidance-instead-of-the-generic-unable-to-access-the-video-message-and-preserves-english-only-user-facing-text",
+      "title": "Refine link-fetch failure classification so that when a fetch fails for known restricted sources (YouTube/TikTok), the app reports the tailored guidance instead of the generic \"Unable to access the video\" message, and preserves English-only user-facing text.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -84,6 +134,12 @@
     {
       "id": "AR-2",
       "summary": "Support converting an uploaded video file into MP3 or WAV",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Fix scrolling behavior in the app UI (chat thread/conversion flow)",
       "reqIds": [],
       "status": "pending"
     }
