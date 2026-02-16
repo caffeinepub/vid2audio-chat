@@ -2,13 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-a-conversational-chat-style-ui-where-a-user-can-either-paste-a-video-url-including-embedded-page-urls-or-direct-file-urls-or-upload-a-video-file-and-then-select-an-output-format-mp3-or-wav-to-start-a-conversion",
-      "featureTitle": "Create a conversational (chat-style) UI where a user can either paste a video URL (including embedded page URLs or direct file URLs) or upload a video file, and then select an output format (MP3 or WAV) to start a conversion.",
+      "featureId": "feature-fix-the-mp3-conversion-crash-that-can-occur-when-converting-an-uploaded-video-file-e-g-error-cannot-read-properties-of-null-reading-copy-buffer-by-hardening-the-mp3-encoding-pipeline-so-the-app-either-a-successfully-produces-an-mp3-download-or-b-fails-gracefully-with-a-clear-english-error-message-no-uncaught-exceptions",
+      "featureTitle": "Fix the MP3 conversion crash that can occur when converting an uploaded video file (e.g., error: \"Cannot read properties of null (reading 'copy_buffer')\") by hardening the MP3 encoding pipeline so the app either (a) successfully produces an MP3 download or (b) fails gracefully with a clear English error message (no uncaught exceptions).",
       "files": [
-        "frontend/src/App.tsx",
         "frontend/src/features/chat/ChatScreen.tsx",
-        "frontend/src/features/chat/components/ChatComposer.tsx",
-        "frontend/src/features/chat/components/ChatThread.tsx"
+        "frontend/src/features/conversion/convertVideoToAudio.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -18,19 +16,16 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-6"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-client-side-video-to-audio-conversion-for-uploaded-video-files-into-mp3-and-wav-and-allow-the-user-to-download-the-resulting-audio-file",
-      "featureTitle": "Implement client-side video-to-audio conversion for uploaded video files into MP3 and WAV, and allow the user to download the resulting audio file.",
+      "featureId": "feature-improve-link-based-conversion-so-that-when-a-user-provides-a-tiktok-short-link-url-e-g-https-www-tiktok-com-t-zp89kbbbe-the-app-performs-a-best-effort-attempt-to-resolve-the-link-and-fetch-the-underlying-video-content-including-following-redirects-and-tolerating-non-video-content-types-when-the-response-is-still-a-video-blob-and-only-fails-when-it-is-truly-not-accessible",
+      "featureTitle": "Improve link-based conversion so that when a user provides a TikTok short-link URL (e.g., https://www.tiktok.com/t/ZP89Kbbbe/), the app performs a best-effort attempt to resolve the link and fetch the underlying video content (including following redirects and tolerating non-\"video/*\" content-types when the response is still a video blob), and only fails when it is truly not accessible.",
       "files": [
-        "frontend/public/vendor/lame.min.js",
-        "frontend/src/features/chat/ChatScreen.tsx",
-        "frontend/src/features/conversion/convertVideoToAudio.ts",
-        "frontend/src/features/conversion/useConversionMutation.ts",
-        "frontend/src/types/vendor-lame.d.ts"
+        "frontend/src/features/conversion/fetchVideoFromUrl.ts",
+        "frontend/src/features/conversion/videoValidation.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -40,16 +35,14 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-2"
+        "REQ-7"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-support-converting-a-video-provided-via-a-link-to-mp3-or-wav-by-attempting-to-fetch-the-video-content-in-the-browser-when-possible-and-provide-clear-fallbacks-instructions-when-a-link-cannot-be-accessed-e-g-due-to-cors-auth-or-non-direct-unsupported-sources",
-      "featureTitle": "Support converting a video provided via a link to MP3 or WAV by attempting to fetch the video content in the browser when possible, and provide clear fallbacks/instructions when a link cannot be accessed (e.g., due to CORS, auth, or non-direct/unsupported sources).",
+      "featureId": "feature-update-user-facing-error-messages-for-url-fetch-failures-so-they-remain-in-english-are-specific-about-what-failed-invalid-url-vs-fetch-blocked-vs-non-video-response-and-avoid-promising-no-restrictions-while-still-communicating-that-the-app-will-attempt-multiple-strategies-to-access-links",
+      "featureTitle": "Update user-facing error messages for URL fetch failures so they remain in English, are specific about what failed (invalid URL vs. fetch blocked vs. non-video response), and avoid promising \"no restrictions\" while still communicating that the app will attempt multiple strategies to access links.",
       "files": [
-        "frontend/src/features/chat/ChatScreen.tsx",
-        "frontend/src/features/chat/components/ChatComposer.tsx",
         "frontend/src/features/conversion/fetchVideoFromUrl.ts",
         "frontend/src/features/validation/urlValidation.ts"
       ],
@@ -61,48 +54,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-conversion-job-history-in-the-ui-within-the-same-chat-thread-that-records-each-conversion-request-and-its-result-success-with-download-link-or-failure-with-reason",
-      "featureTitle": "Add a conversion job history in the UI (within the same chat thread) that records each conversion request and its result (success with download link, or failure with reason).",
-      "files": [
-        "frontend/src/features/chat/ChatScreen.tsx",
-        "frontend/src/features/chat/components/ChatThread.tsx",
-        "frontend/src/features/jobs/types.ts",
-        "frontend/src/features/jobs/useJobHistory.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-establish-a-coherent-distinct-visual-theme-for-the-app-colors-typography-spacing-and-component-styling-and-apply-it-consistently-across-the-chat-thread-input-composer-conversion-controls-and-status-states",
-      "featureTitle": "Establish a coherent, distinct visual theme for the app (colors, typography, spacing, and component styling) and apply it consistently across the chat thread, input composer, conversion controls, and status states.",
-      "files": [
-        "frontend/src/features/chat/ChatScreen.tsx",
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
+        "REQ-8"
       ],
       "confidence": "high"
     }

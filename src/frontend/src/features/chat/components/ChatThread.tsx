@@ -78,9 +78,14 @@ export default function ChatThread({ jobs }: ChatThreadProps) {
               )}
 
               {job.status === 'fetching' && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Fetching video from URL...</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Fetching video from URL...</span>
+                  </div>
+                  {job.progress !== undefined && job.progress > 0 && (
+                    <Progress value={job.progress} className="h-2" />
+                  )}
                 </div>
               )}
 
@@ -117,17 +122,17 @@ export default function ChatThread({ jobs }: ChatThreadProps) {
                       }}
                     >
                       <Download className="mr-2 h-4 w-4" />
-                      Download {job.filename}
+                      Download {job.format.toUpperCase()}
                     </Button>
                   )}
                 </div>
               )}
 
-              {job.status === 'failed' && (
-                <Alert variant="destructive" className="border-destructive/50">
+              {job.status === 'failed' && job.error && (
+                <Alert variant="destructive" className="border-red-200 dark:border-red-900">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription className="text-sm">
-                    {job.error || 'Conversion failed. Please try again.'}
+                    {job.error}
                   </AlertDescription>
                 </Alert>
               )}

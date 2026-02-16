@@ -31,14 +31,19 @@ export default function ChatScreen() {
 
       if (inputType === 'link' && typeof source === 'string') {
         // Update status to fetching
-        updateJob(jobId, { status: 'fetching' });
+        updateJob(jobId, { status: 'fetching', progress: 0 });
         
         try {
           fileToConvert = await fetchVideoFromUrl(source);
+          updateJob(jobId, { progress: 10 });
         } catch (error) {
+          const errorMessage = error instanceof Error 
+            ? error.message 
+            : 'Failed to fetch video from URL. Please check the link and try again, or upload the file directly.';
+          
           updateJob(jobId, {
             status: 'failed',
-            error: error instanceof Error ? error.message : 'Failed to fetch video from URL. The link may not be accessible due to CORS restrictions or authentication requirements. Please try uploading the file directly instead.',
+            error: errorMessage,
           });
           setIsProcessing(false);
           return;
@@ -50,28 +55,44 @@ export default function ChatScreen() {
       }
 
       // Update status to converting
-      updateJob(jobId, { status: 'converting' });
+      updateJob(jobId, { status: 'converting', progress: 10 });
 
       // Perform conversion
-      const result = await conversionMutation.mutateAsync({
-        file: fileToConvert,
-        format,
-        onProgress: (progress) => {
-          updateJob(jobId, { progress });
-        },
-      });
+      try {
+        const result = await conversionMutation.mutateAsync({
+          file: fileToConvert,
+          format,
+          onProgress: (progress) => {
+            updateJob(jobId, { progress: Math.min(99, progress) });
+          },
+        });
 
-      // Update job with success
-      updateJob(jobId, {
-        status: 'done',
-        downloadUrl: result.url,
-        filename: result.filename,
-        progress: 100,
-      });
+        // Update job with success
+        updateJob(jobId, {
+          status: 'done',
+          downloadUrl: result.url,
+          filename: result.filename,
+          progress: 100,
+        });
+      } catch (conversionError) {
+        const errorMessage = conversionError instanceof Error 
+          ? conversionError.message 
+          : 'Conversion failed. Please try again with a different file or format.';
+        
+        updateJob(jobId, {
+          status: 'failed',
+          error: errorMessage,
+          progress: undefined,
+        });
+      }
     } catch (error) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'An unexpected error occurred. Please try again.';
+      
       updateJob(jobId, {
         status: 'failed',
-        error: error instanceof Error ? error.message : 'Conversion failed. Please try again.',
+        error: errorMessage,
       });
     } finally {
       setIsProcessing(false);

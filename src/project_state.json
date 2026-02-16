@@ -1,10 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 3,
+  "projectStateVersion": 5,
   "summary": "Build an app that converts videos to audio (MP3/WAV) from either video links (embedded or direct) or uploaded video files.",
   "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Converting a TikTok short-link URL fails with an \"Unable to access the video URL\" message (CORS/auth/non-direct source limitations).",
+    "Uploading a video and converting to MP3 can crash with \"Cannot read properties of null (reading 'copy_buffer')\" (null buffer/FFmpeg processing error)."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-create-a-conversational-chat-style-ui-where-a-user-can-either-paste-a-video-url-including-embedded-page-urls-or-direct-file-urls-or-upload-a-video-file-and-then-select-an-output-format-mp3-or-wav-to-start-a-conversion",
@@ -43,6 +46,30 @@
       "title": "Establish a coherent, distinct visual theme for the app (colors, typography, spacing, and component styling) and apply it consistently across the chat thread, input composer, conversion controls, and status states.",
       "reqIds": [
         "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-mp3-conversion-crash-that-can-occur-when-converting-an-uploaded-video-file-e-g-error-cannot-read-properties-of-null-reading-copy-buffer-by-hardening-the-mp3-encoding-pipeline-so-the-app-either-a-successfully-produces-an-mp3-download-or-b-fails-gracefully-with-a-clear-english-error-message-no-uncaught-exceptions",
+      "title": "Fix the MP3 conversion crash that can occur when converting an uploaded video file (e.g., error: \"Cannot read properties of null (reading 'copy_buffer')\") by hardening the MP3 encoding pipeline so the app either (a) successfully produces an MP3 download or (b) fails gracefully with a clear English error message (no uncaught exceptions).",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-link-based-conversion-so-that-when-a-user-provides-a-tiktok-short-link-url-e-g-https-www-tiktok-com-t-zp89kbbbe-the-app-performs-a-best-effort-attempt-to-resolve-the-link-and-fetch-the-underlying-video-content-including-following-redirects-and-tolerating-non-video-content-types-when-the-response-is-still-a-video-blob-and-only-fails-when-it-is-truly-not-accessible",
+      "title": "Improve link-based conversion so that when a user provides a TikTok short-link URL (e.g., https://www.tiktok.com/t/ZP89Kbbbe/), the app performs a best-effort attempt to resolve the link and fetch the underlying video content (including following redirects and tolerating non-\"video/*\" content-types when the response is still a video blob), and only fails when it is truly not accessible.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-user-facing-error-messages-for-url-fetch-failures-so-they-remain-in-english-are-specific-about-what-failed-invalid-url-vs-fetch-blocked-vs-non-video-response-and-avoid-promising-no-restrictions-while-still-communicating-that-the-app-will-attempt-multiple-strategies-to-access-links",
+      "title": "Update user-facing error messages for URL fetch failures so they remain in English, are specific about what failed (invalid URL vs. fetch blocked vs. non-video response), and avoid promising \"no restrictions\" while still communicating that the app will attempt multiple strategies to access links.",
+      "reqIds": [
+        "REQ-8"
       ],
       "version": 1
     }

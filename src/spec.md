@@ -1,14 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Provide a chat-style web UI that converts user-supplied videos (uploaded files or accessible direct video URLs) into downloadable MP3 or WAV audio, with clear status, progress, and history.
+**Goal:** Make URL-based TikTok conversions more resilient and improve frontend error handling so MP3 conversions never crash and failures provide clear, accurate English messaging.
 
 **Planned changes:**
-- Build a conversational (chat-thread) interface with an input composer that supports pasting a video URL and selecting a local video file.
-- Add a guided flow in-chat to select output format (MP3/WAV) and start conversion, with English prompts and validation for empty/invalid URLs.
-- Implement client-side conversion for uploaded video files to MP3 and WAV, showing progress/busy states, handling errors safely, and providing a download action plus basic output metadata (format, filename).
-- Attempt in-browser fetching/conversion for publicly accessible direct video file URLs; when inaccessible (e.g., CORS/auth/non-direct), show a clear English fallback message recommending file upload.
-- Record a conversion job history within the same chat thread, including input type (Link/Upload), chosen format, status (Pending/Converting/Done/Failed), timestamp, and (on success) a download link that works until page refresh.
-- Apply a consistent, distinct visual theme across the chat UI and states (avoid a blue/purple-dominant palette), with clear hover/focus/disabled/loading styling.
+- Harden the client-side MP3 encoding/conversion pipeline to prevent uncaught exceptions (e.g., null buffer errors) and ensure jobs reliably end as Done (with download) or Failed (with a user-friendly English error).
+- Improve URL fetch/resolution for TikTok short links by following redirects and attempting best-effort retrieval of the underlying video content before failing.
+- Relax overly strict response validation so conversion can proceed when a fetched Blob is convertible even if Content-Type is missing or is `application/octet-stream` (instead of requiring `video/*`).
+- Update URL fetch failure messages to be English, specific (invalid URL vs blocked fetch vs non-video response), and accurate about third-party access limitations while noting the app will try multiple strategies.
 
-**User-visible outcome:** Users can interact in a chat-like screen to paste a video link or upload a video, choose MP3 or WAV, watch conversion progress, download the resulting audio, and review past conversion attempts (including failures with reasons) in the same conversation thread.
+**User-visible outcome:** Users can upload a video and convert it to MP3 without the UI crashing; URL-based conversions (including TikTok short links) try more reliably to fetch and convert videos, and when something can’t be accessed, the app shows clear English failure reasons and suggested alternatives.

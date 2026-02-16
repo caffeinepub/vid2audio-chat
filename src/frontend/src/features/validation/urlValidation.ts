@@ -12,5 +12,12 @@ export function isValidUrl(url: string): boolean {
 }
 
 export function normalizeUrl(url: string): string {
-  return url.trim();
+  const trimmed = url.trim();
+  
+  // If URL doesn't start with http:// or https://, try adding https://
+  if (trimmed && !trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+    return 'https://' + trimmed;
+  }
+  
+  return trimmed;
 }
