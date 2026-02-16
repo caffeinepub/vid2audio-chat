@@ -75,10 +75,10 @@ export function getRestrictedSourceError(source: RestrictedSource): string {
 export function getRestrictedSourceWarning(source: RestrictedSource): string {
   switch (source) {
     case 'youtube':
-      return 'YouTube links often cannot be fetched directly due to access restrictions. Consider downloading the video and uploading it as a file instead.';
+      return 'YouTube videos cannot be accessed directly from the browser due to restrictions. Please download the video using a YouTube downloader and upload the file directly.';
     case 'tiktok':
-      return 'TikTok links often cannot be fetched directly due to access restrictions. Consider downloading the video and uploading it as a file instead.';
+      return 'TikTok videos cannot be accessed directly from the browser due to restrictions. Please download the video and upload the file directly.';
     default:
-      return 'This link may not be accessible directly. Consider downloading and uploading the file instead.';
+      return 'This video source may not be accessible directly from the browser. Please download the video and upload the file directly.';
   }
 }

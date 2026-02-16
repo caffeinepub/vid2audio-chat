@@ -1,13 +1,16 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
+  "projectStateVersion": 11,
   "summary": "Build an app that converts videos to audio (MP3/WAV) from either video links (embedded or direct) or uploaded video files.",
-  "architectural_notes": [],
+  "architectural_notes": [
+    "In-browser link fetching cannot reliably support YouTube/TikTok due to CORS/auth/anti-bot restrictions; supporting 'any link' may require a server-side fetch/processing pipeline or explicit fallback guidance."
+  ],
   "known_issues": [
     "Converting a TikTok short-link URL fails with an \"Unable to access the video URL\" message (CORS/auth/non-direct source limitations).",
     "Uploading a video and converting to MP3 can crash with \"Cannot read properties of null (reading 'copy_buffer')\" (null buffer/FFmpeg processing error).",
     "Scrolling in the app UI is broken/undesirable and needs to be fixed.",
-    "YouTube links (e.g., youtu.be/...) are failing with the same \"Unable to access the video\" error as TikTok links (likely due to CORS/auth/anti-bot restrictions on link fetching in-browser)."
+    "YouTube links (e.g., youtu.be/...) are failing with the same \"Unable to access the video\" error as TikTok links (likely due to CORS/auth/anti-bot restrictions on link fetching in-browser).",
+    "Current link-conversion approach cannot satisfy the requirement that 'any link' works because YouTube (and similar sources) block direct browser fetching (CORS/anti-bot), forcing download+upload as a workaround."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -122,6 +125,22 @@
         "REQ-14"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-ensure-the-youtube-restricted-source-failure-message-shown-to-users-is-exactly-youtube-videos-cannot-be-accessed-directly-from-the-browser-due-to-cors-restrictions-and-anti-bot-protection-please-download-the-video-using-a-youtube-downloader-and-upload-the-file-directly-and-that-this-message-is-used-consistently-anywhere-the-app-blocks-youtube-link-conversion-including-early-restricted-source-checks-and-any-fetch-failure-classification-that-maps-to-youtube",
+      "title": "Ensure the YouTube restricted-source failure message shown to users is exactly: \"YouTube videos cannot be accessed directly from the browser due to CORS restrictions and anti-bot protection. Please download the video using a YouTube downloader and upload the file directly.\" and that this message is used consistently anywhere the app blocks YouTube link conversion (including early restricted-source checks and any fetch-failure classification that maps to YouTube).",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-restricted-source-warning-text-displayed-in-the-url-input-ui-so-it-does-not-imply-that-the-app-can-convert-any-link-and-instead-clearly-communicates-in-english-that-some-sources-including-youtube-commonly-cannot-be-accessed-directly-in-the-browser-and-that-download-upload-is-the-expected-workaround",
+      "title": "Update the restricted-source warning text displayed in the URL input UI so it does not imply that the app can convert “any link”, and instead clearly communicates (in English) that some sources (including YouTube) commonly cannot be accessed directly in the browser and that download+upload is the expected workaround.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -140,6 +159,12 @@
     {
       "id": "AR-3",
       "summary": "Fix scrolling behavior in the app UI (chat thread/conversion flow)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Enable YouTube (and other restricted-source) link conversion via a server-side/proxy-based workflow instead of in-browser fetching to overcome CORS/anti-bot limitations",
       "reqIds": [],
       "status": "pending"
     }

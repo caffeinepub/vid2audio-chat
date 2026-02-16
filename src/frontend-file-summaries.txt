@@ -2,7 +2,7 @@
   "frontend/src/App.tsx": "Main app component that renders the ChatScreen as the single-page application entry point.",
   "frontend/src/features/chat/ChatScreen.tsx": "Main chat screen with early restricted-source detection before fetch attempts, restructured layout using a dedicated scrollable thread container, auto-scroll management, and a \"Scroll to latest\" button.",
   "frontend/src/features/chat/components/ChatThread.tsx": "Chat-style job history display showing conversion status, progress, download buttons, and user-friendly error messages with proper visual feedback for all job states.",
-  "frontend/src/features/chat/components/ChatComposer.tsx": "Input composer component with tabs for link/upload modes, format selection, validation, and inline warning alerts when YouTube or TikTok URLs are detected in the URL input field.",
+  "frontend/src/features/chat/components/ChatComposer.tsx": "Input composer component with tabs for link/upload modes, format selection, validation, and inline warning alerts that appear when YouTube or TikTok URLs are detected (even without scheme), displaying clear messaging that these sources require download+upload.",
   "frontend/src/features/jobs/types.ts": "TypeScript type definitions for conversion jobs including status, metadata, and result data.",
   "frontend/src/features/jobs/useJobHistory.ts": "React hook managing in-session conversion job history with add and update operations.",
   "frontend/src/features/conversion/useConversionMutation.ts": "React Query mutation hook wrapping the video-to-audio conversion logic with progress tracking.",
@@ -17,5 +17,5 @@
   "frontend/src/features/conversion/videoValidation.ts": "Helper utilities to validate whether a fetched Blob is a playable video by checking file signatures and attempting to load metadata, used when Content-Type headers are unreliable.",
   "frontend/src/hooks/useAppViewportHeight.ts": "Hook that updates a CSS custom property with the actual viewport height to handle mobile browser UI changes (address bar showing/hiding).",
   "frontend/src/hooks/useChatAutoScroll.ts": "Hook that manages auto-scroll behavior for chat threads, tracking whether user is near bottom and auto-scrolling only when appropriate while providing manual scroll-to-bottom functionality.",
-  "frontend/src/features/conversion/restrictedSources.ts": "Helper utilities to detect restricted video sources (YouTube, TikTok) from URLs and provide tailored error messages and warnings for each platform."
+  "frontend/src/features/conversion/restrictedSources.ts": "Helper utilities to detect restricted video sources (YouTube, TikTok) from URLs and provide consistent error messages and warnings that clearly state these sources cannot be accessed directly from the browser and require download+upload workflow."
 }

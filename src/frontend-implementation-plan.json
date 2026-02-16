@@ -1,73 +1,51 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Vid2Audio Chat — Better handling for restricted YouTube/TikTok URL fetching",
+  "title": "Align restricted-source messaging for YouTube/TikTok and avoid overpromising link support",
   "requirements": [
     {
-      "id": "REQ-12",
-      "summary": "Fail fast for YouTube/TikTok URLs during link conversion with a tailored English message directing users to download and upload instead.",
+      "id": "REQ-15",
+      "summary": "Use the exact provided YouTube restricted-source failure message everywhere the app blocks YouTube URL conversion (early checks and fetch-failure classification).",
       "acceptanceCriteria": [
-        "When the user submits https://youtu.be/pocCdsKX21s?si=d5mz9IZWbHGEmsm2, the job fails quickly without waiting for a long fetch attempt.",
-        "The displayed error is in English and explicitly mentions YouTube (and similarly TikTok) links are often not directly accessible from the browser due to CORS/auth/anti-bot restrictions.",
-        "The error message provides a clear next step: download the video and upload it as a file to convert."
+        "When a user attempts to convert a YouTube URL (e.g., youtube.com or youtu.be), the job fails with the exact YouTube message provided (character-for-character).",
+        "No other YouTube-related error shown to the user contradicts the provided message or suggests YouTube links can be fetched in-browser.",
+        "All user-facing text involved in this flow remains in English."
       ],
       "file_operations": [
         {
           "path": "frontend/src/features/conversion/restrictedSources.ts",
-          "operation": "create",
-          "description": "Add URL classification helpers to detect restricted sources (YouTube/TikTok) from user input and from post-redirect/final URLs; export a small API (e.g., detectRestrictedSource(url) -> 'youtube'|'tiktok'|null) used by the link-fetch and UI layers."
-        },
-        {
-          "path": "frontend/src/features/chat/ChatScreen.tsx",
           "operation": "modify",
-          "description": "Detect YouTube/TikTok URLs before starting the fetch step in the link-conversion flow, and immediately mark the job as failed with a specific English error message instructing the user to download the video and upload the file instead (no long fetch attempt)."
+          "description": "Centralize the YouTube restricted-source failure copy into a single exported constant (exactly: \"YouTube videos cannot be accessed directly from the browser due to CORS restrictions and anti-bot protection. Please download the video using a YouTube downloader and upload the file directly.\") and ensure getRestrictedSourceError('youtube') returns that constant so every caller shows the identical message."
         },
         {
           "path": "frontend/src/features/conversion/fetchVideoFromUrl.ts",
           "operation": "modify",
-          "description": "Add an early restricted-source guard (YouTube/TikTok) using the shared helper so fetchVideoFromUrl fails fast with the tailored English guidance, without initiating fetch for those sources."
+          "description": "Audit and adjust error mapping so any restricted-source detection/classification that resolves to YouTube always throws the YouTube message from getRestrictedSourceError('youtube') (no alternative YouTube-specific failure strings)."
+        },
+        {
+          "path": "frontend/src/features/chat/ChatScreen.tsx",
+          "operation": "modify",
+          "description": "Confirm the early restricted-source check and any link-conversion failure handling paths display the YouTube message via getRestrictedSourceError('youtube') and do not introduce any contradictory YouTube-specific copy."
         }
       ]
     },
     {
-      "id": "REQ-13",
-      "summary": "Show an inline English warning in the URL input when a YouTube or TikTok link is detected, while keeping Convert behavior unchanged.",
+      "id": "REQ-16",
+      "summary": "Update the URL input inline restricted-source warning so it does not imply “any link” will work and clearly recommends download+upload for sources like YouTube blocked in-browser.",
       "acceptanceCriteria": [
-        "When a YouTube URL (youtube.com or youtu.be) is present in the URL input, the UI shows an English inline warning that YouTube links often cannot be fetched directly and suggests uploading the file.",
-        "When a TikTok URL (tiktok.com) is present in the URL input, the UI shows an equivalent English inline warning.",
-        "The Convert button behavior remains unchanged (users can still try), but the warning appears before they submit."
+        "When a user pastes a YouTube URL into the URL input, the inline warning is in English and clearly sets expectations that YouTube may not work via direct link due to browser restrictions, recommending download+upload.",
+        "No UI copy claims or strongly implies that the app can convert any arbitrary link successfully."
       ],
       "file_operations": [
+        {
+          "path": "frontend/src/features/conversion/restrictedSources.ts",
+          "operation": "modify",
+          "description": "Revise getRestrictedSourceWarning('youtube') (and keep other warnings consistent) to clearly state in English that some sources (including YouTube) commonly cannot be accessed directly in the browser due to restrictions and that download+upload is the expected workaround."
+        },
         {
           "path": "frontend/src/features/chat/components/ChatComposer.tsx",
           "operation": "modify",
-          "description": "Use the shared restricted-source URL detection helper to show an inline warning when the current URL looks like YouTube or TikTok, while still enabling the existing Convert flow. Use shadcn-ui's Alert component to present the warning consistently (Verify the component's usage instructions before implementing)."
-        },
-        {
-          "path": "frontend/src/features/conversion/restrictedSources.ts",
-          "operation": "modify",
-          "description": "Ensure the restricted-source helper covers the required host patterns (youtube.com, youtu.be, tiktok.com) so the composer can warn proactively and consistently."
-        }
-      ]
-    },
-    {
-      "id": "REQ-14",
-      "summary": "Classify link-fetch failures so YouTube/TikTok errors show tailored guidance instead of the generic message, keeping all user-facing text English-only.",
-      "acceptanceCriteria": [
-        "For YouTube/TikTok URLs that result in fetch errors, the final job error shown in the chat thread uses the tailored, source-specific guidance rather than the generic message.",
-        "For non-YouTube/TikTok URLs, existing error messages remain English, specific, and continue to distinguish invalid URL vs access denied vs not found vs non-video response where possible.",
-        "No user-facing error text is shown in any language other than English."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/conversion/fetchVideoFromUrl.ts",
-          "operation": "modify",
-          "description": "Refine fetch error handling to prefer the YouTube/TikTok tailored guidance when the original URL or final/redirected URL is a restricted source (including TypeError/network failures), while preserving existing English error distinctions for non-restricted sources."
-        },
-        {
-          "path": "frontend/src/features/chat/ChatScreen.tsx",
-          "operation": "modify",
-          "description": "Ensure job failure messages shown in the chat thread use the refined, source-specific error text for YouTube/TikTok fetch failures (propagate thrown messages as-is) and keep fallback error strings English-only."
+          "description": "Update the URL input UI logic so the restricted-source inline warning reliably appears when a user pastes a YouTube URL (even if missing a scheme), and ensure the warning copy does not imply the app can convert “any link” successfully."
         }
       ]
     }

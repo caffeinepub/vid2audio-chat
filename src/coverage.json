@@ -1,54 +1,39 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-16T22:26:15.133Z",
+  "generatedAt": "2026-02-16T22:32:36.237Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-12",
-        "summary": "Detect YouTube and TikTok URLs early in the link-conversion flow and fail fast with a specific, English error message explaining that these sites typically cannot be fetched directly by the browser due to CORS/auth/anti-bot restrictions, and instruct the user to download the video and upload the file instead.",
+        "id": "REQ-15",
+        "summary": "Ensure the YouTube restricted-source failure message shown to users is exactly: \"YouTube videos cannot be accessed directly from the browser due to CORS restrictions and anti-bot protection. Please download the video using a YouTube downloader and upload the file directly.\" and that this message is used consistently anywhere the app blocks YouTube link conversion (including early restricted-source checks and any fetch-failure classification that maps to YouTube).",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/features/conversion/restrictedSources.ts",
-          "frontend/src/features/chat/ChatScreen.tsx",
-          "frontend/src/features/conversion/fetchVideoFromUrl.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/conversion/restrictedSources.ts",
-          "frontend/src/features/chat/ChatScreen.tsx",
-          "frontend/src/features/conversion/fetchVideoFromUrl.ts"
-        ]
-      },
-      {
-        "id": "REQ-13",
-        "summary": "Update the URL input UI to proactively warn users (in English) when they paste a YouTube or TikTok link that the app may not be able to access it, while still allowing them to attempt conversion.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/chat/components/ChatComposer.tsx",
-          "frontend/src/features/conversion/restrictedSources.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/chat/components/ChatComposer.tsx",
-          "frontend/src/features/conversion/restrictedSources.ts"
-        ]
-      },
-      {
-        "id": "REQ-14",
-        "summary": "Refine link-fetch failure classification so that when a fetch fails for known restricted sources (YouTube/TikTok), the app reports the tailored guidance instead of the generic \"Unable to access the video\" message, and preserves English-only user-facing text.",
-        "status": "implemented",
-        "plannedFiles": [
           "frontend/src/features/conversion/fetchVideoFromUrl.ts",
           "frontend/src/features/chat/ChatScreen.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/features/conversion/fetchVideoFromUrl.ts",
-          "frontend/src/features/chat/ChatScreen.tsx"
+          "frontend/src/features/conversion/restrictedSources.ts"
+        ]
+      },
+      {
+        "id": "REQ-16",
+        "summary": "Update the restricted-source warning text displayed in the URL input UI so it does not imply that the app can convert “any link”, and instead clearly communicates (in English) that some sources (including YouTube) commonly cannot be accessed directly in the browser and that download+upload is the expected workaround.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/features/conversion/restrictedSources.ts",
+          "frontend/src/features/chat/components/ChatComposer.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/features/conversion/restrictedSources.ts",
+          "frontend/src/features/chat/components/ChatComposer.tsx"
         ]
       }
     ]
@@ -58,9 +43,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/features/chat/ChatScreen.tsx",
     "frontend/src/features/chat/components/ChatComposer.tsx",
-    "frontend/src/features/conversion/fetchVideoFromUrl.ts",
     "frontend/src/features/conversion/restrictedSources.ts",
     "project_state.json",
     "scratch/component-selection.json",

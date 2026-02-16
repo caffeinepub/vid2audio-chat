@@ -1,76 +1,68 @@
 {
   "kind": "build_request",
-  "title": "Improve handling of YouTube/TikTok links that cannot be fetched in-browser",
+  "title": "Align restricted-source messaging (YouTube/TikTok) and avoid promising that any link will work",
   "projectName": "Vid2Audio Chat",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-12",
-      "text": "Detect YouTube and TikTok URLs early in the link-conversion flow and fail fast with a specific, English error message explaining that these sites typically cannot be fetched directly by the browser due to CORS/auth/anti-bot restrictions, and instruct the user to download the video and upload the file instead.",
+      "id": "REQ-15",
+      "text": "Ensure the YouTube restricted-source failure message shown to users is exactly: \"YouTube videos cannot be accessed directly from the browser due to CORS restrictions and anti-bot protection. Please download the video using a YouTube downloader and upload the file directly.\" and that this message is used consistently anywhere the app blocks YouTube link conversion (including early restricted-source checks and any fetch-failure classification that maps to YouTube).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-msg-1"
+          "msg-8"
         ],
         "quotes": [
-          "It's only YouTube link tiktok link said same issue , fix it https://youtu.be/pocCdsKX21s?si=d5mz9IZWbHGEmsm2"
+          "YouTube videos cannot be accessed directly from the browser due to CORS restrictions and anti-bot protection. Please download the video using a YouTube downloader and upload the file directly."
         ]
       },
       "acceptanceCriteria": [
-        "When the user submits https://youtu.be/pocCdsKX21s?si=d5mz9IZWbHGEmsm2, the job fails quickly without waiting for a long fetch attempt.",
-        "The displayed error is in English and explicitly mentions YouTube (and similarly TikTok) links are often not directly accessible from the browser due to CORS/auth/anti-bot restrictions.",
-        "The error message provides a clear next step: download the video and upload it as a file to convert."
+        "When a user attempts to convert a YouTube URL (e.g., youtube.com or youtu.be), the job fails with the exact YouTube message provided (character-for-character).",
+        "No other YouTube-related error shown to the user contradicts the provided message or suggests YouTube links can be fetched in-browser.",
+        "All user-facing text involved in this flow remains in English."
       ]
     },
     {
-      "id": "REQ-13",
-      "text": "Update the URL input UI to proactively warn users (in English) when they paste a YouTube or TikTok link that the app may not be able to access it, while still allowing them to attempt conversion.",
+      "id": "REQ-16",
+      "text": "Update the restricted-source warning text displayed in the URL input UI so it does not imply that the app can convert “any link”, and instead clearly communicates (in English) that some sources (including YouTube) commonly cannot be accessed directly in the browser and that download+upload is the expected workaround.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-msg-1"
+          "msg-8"
         ],
         "quotes": [
-          "Unable to access the video... It's only YouTube link tiktok link said same issue"
+          "Specifically asked for any link to work!"
         ]
       },
       "acceptanceCriteria": [
-        "When a YouTube URL (youtube.com or youtu.be) is present in the URL input, the UI shows an English inline warning that YouTube links often cannot be fetched directly and suggests uploading the file.",
-        "When a TikTok URL (tiktok.com) is present in the URL input, the UI shows an equivalent English inline warning.",
-        "The Convert button behavior remains unchanged (users can still try), but the warning appears before they submit."
-      ]
-    },
-    {
-      "id": "REQ-14",
-      "text": "Refine link-fetch failure classification so that when a fetch fails for known restricted sources (YouTube/TikTok), the app reports the tailored guidance instead of the generic \"Unable to access the video\" message, and preserves English-only user-facing text.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "user-msg-1"
-        ],
-        "quotes": [
-          "Unable to access the video. The source may block browser access (CORS), require authentication, or use anti-bot protection."
-        ]
-      },
-      "acceptanceCriteria": [
-        "For YouTube/TikTok URLs that result in fetch errors, the final job error shown in the chat thread uses the tailored, source-specific guidance rather than the generic message.",
-        "For non-YouTube/TikTok URLs, existing error messages remain English, specific, and continue to distinguish invalid URL vs access denied vs not found vs non-video response where possible.",
-        "No user-facing error text is shown in any language other than English."
+        "When a user pastes a YouTube URL into the URL input, the inline warning is in English and clearly sets expectations that YouTube may not work via direct link due to browser restrictions, recommending download+upload.",
+        "No UI copy claims or strongly implies that the app can convert any arbitrary link successfully."
       ]
     }
   ],
   "constraints": [
-    "Do not add server-side downloading or processing; the app must remain client-side for link fetching and conversion.",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui (compose them instead).",
-    "Keep backend as a single Motoko actor; do not introduce additional backend services."
+    "Do not edit files under frontend/src/components/ui (Shadcn components must be composed, not modified).",
+    "Do not edit any frontend immutable paths listed in SYSTEM_CONTEXT.",
+    "Backend must remain single-actor; only introduce backend changes if explicitly required by the requirements."
   ],
   "nonGoals": [
-    "Bypassing YouTube/TikTok anti-bot protections or implementing a YouTube/TikTok downloader/extractor.",
-    "Adding third-party APIs or external proxy services to fetch restricted video sources.",
-    "Implementing server-side video conversion or storage."
+    "Implementing a server-side/proxy-based workflow to make YouTube (or other restricted sources) reliably convertible by URL.",
+    "Guaranteeing that all arbitrary video page links (non-direct links) will be fetchable and convertible in the browser."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [
+      "Keep all user-facing text in English and avoid overpromising capabilities like 'any link will work' when browser restrictions apply."
+    ],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

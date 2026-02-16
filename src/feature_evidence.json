@@ -2,11 +2,9 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-detect-youtube-and-tiktok-urls-early-in-the-link-conversion-flow-and-fail-fast-with-a-specific-english-error-message-explaining-that-these-sites-typically-cannot-be-fetched-directly-by-the-browser-due-to-cors-auth-anti-bot-restrictions-and-instruct-the-user-to-download-the-video-and-upload-the-file-instead",
-      "featureTitle": "Detect YouTube and TikTok URLs early in the link-conversion flow and fail fast with a specific, English error message explaining that these sites typically cannot be fetched directly by the browser due to CORS/auth/anti-bot restrictions, and instruct the user to download the video and upload the file instead.",
+      "featureId": "feature-ensure-the-youtube-restricted-source-failure-message-shown-to-users-is-exactly-youtube-videos-cannot-be-accessed-directly-from-the-browser-due-to-cors-restrictions-and-anti-bot-protection-please-download-the-video-using-a-youtube-downloader-and-upload-the-file-directly-and-that-this-message-is-used-consistently-anywhere-the-app-blocks-youtube-link-conversion-including-early-restricted-source-checks-and-any-fetch-failure-classification-that-maps-to-youtube",
+      "featureTitle": "Ensure the YouTube restricted-source failure message shown to users is exactly: \"YouTube videos cannot be accessed directly from the browser due to CORS restrictions and anti-bot protection. Please download the video using a YouTube downloader and upload the file directly.\" and that this message is used consistently anywhere the app blocks YouTube link conversion (including early restricted-source checks and any fetch-failure classification that maps to YouTube).",
       "files": [
-        "frontend/src/features/chat/ChatScreen.tsx",
-        "frontend/src/features/conversion/fetchVideoFromUrl.ts",
         "frontend/src/features/conversion/restrictedSources.ts"
       ],
       "components": [
@@ -17,13 +15,13 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-12"
+        "REQ-15"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-url-input-ui-to-proactively-warn-users-in-english-when-they-paste-a-youtube-or-tiktok-link-that-the-app-may-not-be-able-to-access-it-while-still-allowing-them-to-attempt-conversion",
-      "featureTitle": "Update the URL input UI to proactively warn users (in English) when they paste a YouTube or TikTok link that the app may not be able to access it, while still allowing them to attempt conversion.",
+      "featureId": "feature-update-the-restricted-source-warning-text-displayed-in-the-url-input-ui-so-it-does-not-imply-that-the-app-can-convert-any-link-and-instead-clearly-communicates-in-english-that-some-sources-including-youtube-commonly-cannot-be-accessed-directly-in-the-browser-and-that-download-upload-is-the-expected-workaround",
+      "featureTitle": "Update the restricted-source warning text displayed in the URL input UI so it does not imply that the app can convert “any link”, and instead clearly communicates (in English) that some sources (including YouTube) commonly cannot be accessed directly in the browser and that download+upload is the expected workaround.",
       "files": [
         "frontend/src/features/chat/components/ChatComposer.tsx",
         "frontend/src/features/conversion/restrictedSources.ts"
@@ -36,26 +34,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-13"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-refine-link-fetch-failure-classification-so-that-when-a-fetch-fails-for-known-restricted-sources-youtube-tiktok-the-app-reports-the-tailored-guidance-instead-of-the-generic-unable-to-access-the-video-message-and-preserves-english-only-user-facing-text",
-      "featureTitle": "Refine link-fetch failure classification so that when a fetch fails for known restricted sources (YouTube/TikTok), the app reports the tailored guidance instead of the generic \"Unable to access the video\" message, and preserves English-only user-facing text.",
-      "files": [
-        "frontend/src/features/chat/ChatScreen.tsx",
-        "frontend/src/features/conversion/fetchVideoFromUrl.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-14"
+        "REQ-16"
       ],
       "confidence": "high"
     }

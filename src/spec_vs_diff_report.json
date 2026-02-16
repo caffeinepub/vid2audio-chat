@@ -1,54 +1,33 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-16T22:26:15.130Z",
-  "summary": "REQ-12/13/14 are largely implemented via a new restricted-source detection utility, early fail-fast behavior in the link conversion flow, inline URL warnings in the input UI, and tailored error messaging for YouTube/TikTok. The diff also includes several unrelated UI/theme/encoding/library changes that were not requested in this BuildRequest.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-16T22:32:36.232Z",
+  "summary": "The diff adds restricted-source detection/warning utilities and shows an inline warning in the URL input UI. The exact required YouTube *error* string exists in `getRestrictedSourceError`, but the provided diff does not show that this exact message is consistently used everywhere YouTube link conversion is blocked/fails (e.g., in early restricted-source checks and fetch-failure classification). The inline warning text for YouTube is updated, but it does not clearly communicate the broader “some sources… commonly cannot be accessed” expectation stated in REQ-16 (it is phrased as a YouTube-only statement).",
+  "missing_requirements": [
     {
-      "description": "Added/changed chat UI behavior and layout features (auto-scroll management, dedicated scrollable thread container, and a \"Scroll to latest\" button).",
-      "reason": "Not requested by REQ-12/13/14, which are specifically about restricted-source detection/warnings/error classification for YouTube/TikTok links.",
+      "id": "REQ-15",
+      "requirement": "Ensure the YouTube restricted-source failure message shown to users is exactly: \"YouTube videos cannot be accessed directly from the browser due to CORS restrictions and anti-bot protection. Please download the video using a YouTube downloader and upload the file directly.\" and that this message is used consistently anywhere the app blocks YouTube link conversion (including early restricted-source checks and any fetch-failure classification that maps to YouTube).",
+      "reason": "While `getRestrictedSourceError('youtube')` contains the exact required message, the diff does not include evidence that all user-facing YouTube failure paths (early restricted-source checks, and fetch-failure classification that maps to YouTube) are actually wired to use this exact string everywhere the app blocks or fails YouTube conversion.",
       "evidence": [
-        "frontend/src/features/chat/ChatScreen.tsx",
-        "frontend-file-summaries.txt"
+        "frontend/src/features/conversion/restrictedSources.ts",
+        "frontend-file-summaries.txt (mentions early restricted-source detection in ChatScreen and fetch-failure messaging in fetchVideoFromUrl, but their actual implementations are not shown in the diff)"
       ]
     },
     {
-      "description": "Global theme/styling changes (warm amber/orange color system, viewport-height CSS variable behavior, body scroll confinement) and Tailwind theme extensions.",
-      "reason": "Not requested by REQ-12/13/14.",
+      "id": "REQ-16",
+      "requirement": "Update the restricted-source warning text displayed in the URL input UI so it does not imply that the app can convert “any link”, and instead clearly communicates (in English) that some sources (including YouTube) commonly cannot be accessed directly in the browser and that download+upload is the expected workaround.",
+      "reason": "The inline warning shown for YouTube is a YouTube-specific statement and does not explicitly set the broader expectation that *some sources* commonly won’t work via direct link; the diff provides no other updated warning copy in the URL input UI addressing that broader framing.",
       "evidence": [
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js",
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "MP3 encoding pipeline hardening and addition of a bundled lamejs vendor library and type declarations.",
-      "reason": "Not requested by REQ-12/13/14 (these requirements concern link handling for YouTube/TikTok).",
-      "evidence": [
-        "frontend/src/features/conversion/convertVideoToAudio.ts",
-        "frontend/public/vendor/lame.min.js",
-        "frontend/src/types/vendor-lame.d.ts",
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "Added new hooks and placeholder queries file (useChatAutoScroll, useAppViewportHeight, empty useQueries placeholder).",
-      "reason": "Not requested by REQ-12/13/14.",
-      "evidence": [
-        "frontend/src/hooks/useChatAutoScroll.ts",
-        "frontend/src/hooks/useAppViewportHeight.ts",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend-file-summaries.txt"
+        "frontend/src/features/chat/components/ChatComposer.tsx",
+        "frontend/src/features/conversion/restrictedSources.ts (getRestrictedSourceWarning)"
       ]
     }
   ],
-  "confidence": 0.74,
+  "hallucinated_features": [],
+  "confidence": 0.63,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/features/chat/ChatScreen.tsx",
     "frontend/src/features/chat/components/ChatComposer.tsx",
-    "frontend/src/features/conversion/fetchVideoFromUrl.ts",
     "frontend/src/features/conversion/restrictedSources.ts",
     "project_state.json"
   ]

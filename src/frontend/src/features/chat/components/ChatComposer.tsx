@@ -25,8 +25,8 @@ export default function ChatComposer({ onConvert, isProcessing }: ChatComposerPr
     format &&
     ((inputType === 'link' && isValidUrl(url)) || (inputType === 'upload' && file !== null));
 
-  // Check if the URL is from a restricted source
-  const restrictedSource = inputType === 'link' && url ? detectRestrictedSource(url) : null;
+  // Check if the URL is from a restricted source (even without scheme)
+  const restrictedSource = inputType === 'link' && url.trim() ? detectRestrictedSource(url) : null;
 
   const handleConvert = () => {
     if (!canConvert) return;
@@ -69,10 +69,10 @@ export default function ChatComposer({ onConvert, isProcessing }: ChatComposerPr
               disabled={isProcessing}
               className="bg-background/50"
             />
-            {url && !isValidUrl(url) && (
+            {url && !isValidUrl(url) && !restrictedSource && (
               <p className="text-xs text-destructive">Please enter a valid URL</p>
             )}
-            {restrictedSource && isValidUrl(url) && (
+            {restrictedSource && (
               <Alert variant="destructive" className="mt-2">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription className="text-sm">
